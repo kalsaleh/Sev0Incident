@@ -43,12 +43,14 @@ function App() {
             uploaded_at: company.created_at
           };
         }
-        batchMap[batchId].companies.push(company);
-        batchMap[batchId].total_companies++;
-        
-        // Determine batch status
-        if (company.status === 'pending' || company.status === 'analyzing') {
-          batchMap[batchId].status = 'processing';
+        if (batchId) {
+          batchMap[batchId].companies.push(company);
+          batchMap[batchId].total_companies++;
+          
+          // Determine batch status
+          if (company.status === 'pending' || company.status === 'analyzing') {
+            batchMap[batchId].status = 'processing';
+          }
         }
       });
       
