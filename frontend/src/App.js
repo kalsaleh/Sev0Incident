@@ -344,7 +344,11 @@ function App() {
                 <button 
                   type="button"
                   onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     console.log('Native button clicked!');
+                    console.log('File state:', file);
+                    console.log('Uploading state:', uploading);
                     handleUpload(e);
                   }} 
                   disabled={!file || uploading}
@@ -361,6 +365,18 @@ function App() {
                       Upload & Analyze
                     </>
                   )}
+                </button>
+                
+                {/* Debug button for testing */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    console.log('Debug button clicked!');
+                    console.log('Window debugUpload function exists:', typeof window.debugUpload);
+                  }}
+                  className="mt-2 px-4 py-2 bg-red-500 text-white rounded"
+                >
+                  Debug Test
                 </button>
               </CardContent>
             </Card>
