@@ -420,6 +420,45 @@ def enhanced_fallback_scoring(company_data: Dict[str, Any], website_data: Dict[s
         else:
             reasoning.append(f"Founded before internet era ({founded_year})")
     
+    # Website data analysis (if available)
+    if website_data and not website_data.get('error'):
+        website_content = str(website_data.get('website_content', '')).lower()
+        title = str(website_data.get('title', '')).lower()
+        meta_description = str(website_data.get('meta_description', '')).lower()
+        
+        # Combine all website text for analysis
+        all_website_text = f"{website_content} {title} {meta_description}"
+        
+        # Website digital indicators
+        website_digital_keywords = ['saas', 'platform', 'api', 'cloud', 'software', 'app', 
+                                   'digital', 'online', 'web', 'service', 'solution', 
+                                   'technology', 'automation', 'analytics', 'dashboard']
+        website_digital_count = sum(1 for keyword in website_digital_keywords if keyword in all_website_text)
+        
+        if website_digital_count >= 5:
+            digital_score += 25
+            reasoning.append("Strong digital indicators from website content")
+        elif website_digital_count >= 3:
+            digital_score += 15
+            reasoning.append("Moderate digital indicators from website content")
+        elif website_digital_count >= 1:
+            digital_score += 5
+            reasoning.append("Some digital indicators from website content")
+        
+        # Check for specific SaaS/tech indicators
+        saas_indicators = ['subscription', 'pricing', 'free trial', 'sign up', 'dashboard', 
+                          'integration', 'api', 'developer', 'enterprise']
+        saas_count = sum(1 for indicator in saas_indicators if indicator in all_website_text)
+        if saas_count >= 3:
+            digital_score += 20
+            reasoning.append("Strong SaaS indicators from website")
+        elif saas_count >= 1:
+            digital_score += 10
+            reasoning.append("Some SaaS indicators from website")
+    
+    elif website_data and website_data.get('error'):
+        reasoning.append(f"Website analysis unavailable: {website_data.get('error')}")
+    
     # Incident.io fit scoring
     
     # High fit industries
