@@ -81,7 +81,103 @@ class AnalysisProgress(BaseModel):
     progress_percentage: float
     status: str
 
-# Initialize LLM Chat
+async def fetch_company_website_data(domain: str, session: aiohttp.ClientSession) -> Dict[str, Any]:
+    """Fetch and analyze company website data"""
+    website_data = {
+        'website_content': '',
+        'meta_description': '',
+        'title': '',
+        'json_ld_data': '',
+        'error': None
+    }
+    
+    if not domain:
+        return website_data
+    
+    try:
+        # Clean domain
+        if not domain.startswith(('http://', 'https://')):
+            domain = f'https://{domain}'
+        
+        # Set headers to mimic a real browser
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+        }
+        
+        # Fetch the website with timeout
+        async with session.get(domain, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as response:
+            if response.status == 200:
+                html = await response.text()
+                soup = BeautifulSoup(html, 'html.parser')
+                
+                # Extract title
+                title_tag = soup.find('title')
+                website_data['title'] = title_tag.get_text().strip() if title_tag else ''
+                
+                # Extract meta description
+                meta_desc = soup.find('meta', attrs={'name': 'description'})
+                if not meta_desc:
+                    meta_desc = soup.find('meta', attrs={'property': 'og:description'})
+                website_data['meta_description'] = meta_desc.get('content', '').strip() if meta_desc else ''
+                
+                # Extract JSON-LD structured data
+                json_scripts = soup.find_all('script', type='application/ld+json')
+                json_data = []
+                for script in json_scripts:
+                    try:
+                        json_content = json.loads(script.string)
+                        json_data.append(json_content)
+                    except:
+                        continue
+                website_data['json_ld_data'] = json.dumps(json_data) if json_data else ''
+                
+                # Extract key content paragraphs (first few paragraphs)
+                paragraphs = soup.find_all('p')[:5]  # Get first 5 paragraphs
+                content_text = ' '.join([p.get_text().strip() for p in paragraphs if p.get_text().strip()])
+                website_data['website_content'] = content_text[:1000]  # Limit to 1000 chars
+                
+            else:
+                website_data['error'] = f"HTTP {response.status}"
+                
+    except asyncio.TimeoutError:
+        website_data['error'] = "Timeout"
+    except Exception as e:
+        website_data['error'] = str(e)
+        logger.warning(f"Error fetching website data for {domain}: {str(e)}")
+    
+    return website_data
+
+def parse_founded_date(founded_date_str: str) -> Optional[int]:
+    """Parse founded date string to extract year"""
+    if not founded_date_str or pd.isna(founded_date_str):
+        return None
+    
+    try:
+        # Handle various date formats
+        founded_str = str(founded_date_str).strip()
+        
+        # Try to extract year from various formats
+        import re
+        
+        # Look for 4-digit year
+        year_match = re.search(r'\b(19|20)\d{2}\b', founded_str)
+        if year_match:
+            return int(year_match.group())
+        
+        # Try parsing as date
+        try:
+            parsed_date = pd.to_datetime(founded_str)
+            return parsed_date.year
+        except:
+            pass
+            
+        return None
+    except:
+        return None
 def get_llm_chat():
     api_key = os.environ.get('EMERGENT_LLM_KEY')
     return LlmChat(
