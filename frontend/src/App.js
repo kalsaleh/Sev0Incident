@@ -13,8 +13,11 @@ import { Alert, AlertDescription } from './components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { toast, Toaster } from 'sonner';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || window.location.origin;
 const API = `${BACKEND_URL}/api`;
+
+console.log('Backend URL:', BACKEND_URL);
+console.log('API URL:', API);
 
 function App() {
   const [file, setFile] = useState(null);
