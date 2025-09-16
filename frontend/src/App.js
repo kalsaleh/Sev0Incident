@@ -25,6 +25,11 @@ function App() {
   const [progress, setProgress] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // Load existing companies on startup
+  useEffect(() => {
+    fetchAllCompanies();
+  }, []);
+
   // Poll for progress updates
   useEffect(() => {
     const interval = setInterval(() => {
