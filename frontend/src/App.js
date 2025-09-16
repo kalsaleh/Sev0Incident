@@ -138,7 +138,10 @@ function App() {
 
   const fetchProgress = async (batchId) => {
     try {
+      console.log('Fetching progress for batch:', batchId);
       const response = await axios.get(`${API}/progress/${batchId}`);
+      console.log('Progress response:', response.data);
+      
       setProgress(prev => ({
         ...prev,
         [batchId]: response.data
