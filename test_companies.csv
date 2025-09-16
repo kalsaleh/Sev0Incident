@@ -1,0 +1,5 @@
+name,domain,industry,founded_year,employee_count,location,description
+Stripe,stripe.com,Fintech,2010,4000,San Francisco,Online payment processing platform
+Shopify,shopify.com,E-commerce,2006,10000,Ottawa,E-commerce platform for online stores
+DataDog,datadoghq.com,Monitoring,2010,3000,New York,Cloud monitoring and analytics platform
+MongoDB,mongodb.com,Database,2007,3500,New York,Document database platform
