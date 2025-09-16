@@ -99,17 +99,25 @@ function App() {
   };
 
   const handleUpload = async () => {
+    console.log('handleUpload called');
+    console.log('File:', file);
+    console.log('API URL:', API);
+    
     if (!file) {
+      console.log('No file selected');
       toast.error('Please select a CSV file first');
       return;
     }
 
     setUploading(true);
+    console.log('Starting upload process...');
+    
     const formData = new FormData();
     formData.append('file', file);
+    console.log('FormData created with file:', file.name);
 
     try {
-      console.log('Uploading file to:', `${API}/analyze-csv`);
+      console.log('Making POST request to:', `${API}/analyze-csv`);
       const response = await axios.post(`${API}/analyze-csv`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -144,6 +152,7 @@ function App() {
       toast.error(errorMessage);
     } finally {
       setUploading(false);
+      console.log('Upload process finished');
     }
   };
 
