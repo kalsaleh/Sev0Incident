@@ -33,7 +33,7 @@ function App() {
       // Group companies by batch_id to create batches
       const batchMap = {};
       companies.forEach(company => {
-        const batchId = company.batch_id || 'unknown';
+        const batchId = company.batch_id;
         if (!batchMap[batchId]) {
           batchMap[batchId] = {
             batch_id: batchId,
