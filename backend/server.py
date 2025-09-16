@@ -554,7 +554,7 @@ async def analyze_csv(background_tasks: BackgroundTasks, file: UploadFile = File
         if missing_columns:
             raise HTTPException(
                 status_code=400, 
-                detail=f"Missing required columns: {missing_columns}"
+                detail=f"Missing required columns: {missing_columns}. Required: name, domain. Optional: industry, founded_year, founded_date, employee_count, location, description"
             )
         
         # Convert DataFrame to company records
@@ -562,12 +562,19 @@ async def analyze_csv(background_tasks: BackgroundTasks, file: UploadFile = File
         batch_id = str(uuid.uuid4())
         
         for _, row in df.iterrows():
+            # Handle founded year - check both founded_year and founded_date columns
+            founded_year = None
+            if 'founded_year' in df.columns and pd.notna(row.get('founded_year')):
+                founded_year = int(row.get('founded_year'))
+            elif 'founded_date' in df.columns and pd.notna(row.get('founded_date')):
+                founded_year = parse_founded_date(row.get('founded_date'))
+            
             company_data = {
                 "id": str(uuid.uuid4()),
                 "name": str(row.get('name', '')),
                 "domain": str(row.get('domain', '')),
                 "industry": str(row.get('industry', '')) if pd.notna(row.get('industry')) else None,
-                "founded_year": int(row.get('founded_year')) if pd.notna(row.get('founded_year')) else None,
+                "founded_year": founded_year,
                 "employee_count": str(row.get('employee_count', '')) if pd.notna(row.get('employee_count')) else None,
                 "location": str(row.get('location', '')) if pd.notna(row.get('location')) else None,
                 "description": str(row.get('description', '')) if pd.notna(row.get('description')) else None,
