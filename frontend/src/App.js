@@ -606,9 +606,18 @@ function App() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge className={`${getScoreColor(company.incident_io_fit_score)} px-2 py-1`}>
-                                {company.incident_io_fit_score}%
-                              </Badge>
+                              <div className="space-y-1">
+                                <Badge className={`${getScoreColor(company.incident_io_fit_score)} px-2 py-1`}>
+                                  {company.incident_io_fit_score}%
+                                </Badge>
+                                {company.incident_io_fit_reasoning && (
+                                  <div className="text-xs text-gray-500 italic max-w-xs">
+                                    "{company.incident_io_fit_reasoning.length > 60 
+                                      ? `${company.incident_io_fit_reasoning.substring(0, 60)}...` 
+                                      : company.incident_io_fit_reasoning}"
+                                  </div>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center space-x-1">
