@@ -563,12 +563,19 @@ function App() {
                         {results.map((company) => (
                           <TableRow key={company.id}>
                             <TableCell>
-                              <div>
-                                <div className="font-medium">{company.name}</div>
-                                {company.founded_year && (
-                                  <div className="text-sm text-gray-600">Founded {company.founded_year}</div>
-                                )}
-                              </div>
+                                <div>
+                                  <div className="font-medium">{company.name}</div>
+                                  {company.founded_year && (
+                                    <div className="text-sm text-gray-600">Founded {company.founded_year}</div>
+                                  )}
+                                  {company.digital_native_reasoning && (
+                                    <div className="text-xs text-gray-500 mt-1 max-w-xs truncate" title={company.digital_native_reasoning}>
+                                      {company.digital_native_reasoning.length > 100 
+                                        ? `${company.digital_native_reasoning.substring(0, 100)}...` 
+                                        : company.digital_native_reasoning}
+                                    </div>
+                                  )}
+                                </div>
                             </TableCell>
                             <TableCell>
                               <a 
