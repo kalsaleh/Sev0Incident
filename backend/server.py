@@ -128,27 +128,54 @@ Description: {company_data.get('description', 'N/A')}
 
 Please analyze this company and provide:
 
-1. Digital Native Score (0-100): Rate how likely this company is to be digital native based on:
-   - Founding year (after 2010)
-   - Industry type (SaaS, ecommerce, fintech, AI, etc.)
-   - Business model dependence on digital platforms
-   - Technology adoption indicators
+**IMPORTANT CRITERIA FOR DIGITAL NATIVE:**
+A company is digital native if it meets MOST of these criteria (not just founding year):
+- Business model fundamentally depends on digital/online platforms
+- Core product/service is software, SaaS, or digital
+- Heavy reliance on technology infrastructure
+- Born digital (even if before 2010, companies like Shopify, GitHub are digital native)
+- Cloud-native or web-first approach
+- Digital customer acquisition and engagement
 
-2. Incident.io Fit Score (0-100): Rate how likely they would need incident.io's services based on:
-   - Engineering team size and complexity
-   - Online service dependencies
-   - Need for uptime and reliability
-   - Technical infrastructure complexity
+**IMPORTANT CRITERIA FOR INCIDENT.IO FIT:**
+A company needs incident.io if they have:
+- Engineering teams managing complex software systems
+- High uptime requirements (SaaS, e-commerce, fintech)
+- Multiple services and microservices architecture  
+- Need for incident response and on-call management
+- DevOps/SRE practices
+- Customer-facing digital services
 
-3. Provide clear reasoning for both scores.
+**ANALYSIS REQUIRED:**
 
-Format your response as JSON:
-{
-  "digital_native_score": <score>,
-  "digital_native_reasoning": "<reasoning>",
-  "incident_io_fit_score": <score>,
-  "incident_io_fit_reasoning": "<reasoning>"
-}
+1. **Digital Native Score (0-100)**: Consider business model, not just founding year
+   - Software/SaaS companies: Usually 70-100%
+   - E-commerce platforms: Usually 60-90%  
+   - Fintech: Usually 70-90%
+   - Traditional companies with digital transformation: 20-60%
+   - Pure traditional/physical companies: 0-30%
+
+2. **Incident.io Fit Score (0-100)**: Based on technical complexity and uptime needs
+   - SaaS/Cloud companies: Usually 60-90%
+   - E-commerce platforms: Usually 50-80%
+   - Fintech: Usually 70-90%
+   - Traditional companies: Usually 10-40%
+
+3. **Provide specific reasoning** explaining why the company is/isn't digital native and why they would/wouldn't need incident.io
+
+**EXAMPLES:**
+- Shopify (2006, E-commerce): HIGH digital native (85%+) - born digital, SaaS platform
+- Stripe (2010, Fintech): HIGH digital native (90%+) - API-first, developer-focused
+- MongoDB (2007, Database): HIGH digital native (80%+) - cloud database platform
+- Traditional bank: LOW digital native (20%) - physical branches, traditional model
+
+Format response as JSON:
+{{
+  "digital_native_score": <number>,
+  "digital_native_reasoning": "<detailed explanation>",
+  "incident_io_fit_score": <number>,
+  "incident_io_fit_reasoning": "<detailed explanation>"
+}}
 """
 
         message = UserMessage(text=company_info)
