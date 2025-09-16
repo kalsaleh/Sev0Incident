@@ -333,27 +333,27 @@ function App() {
                   </Alert>
                 )}
 
-                <Button 
+                <button 
                   type="button"
                   onClick={(e) => {
-                    console.log('Button clicked!');
+                    console.log('Native button clicked!');
                     handleUpload(e);
                   }} 
                   disabled={!file || uploading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md disabled:opacity-50"
                 >
                   {uploading ? (
                     <>
-                      <Clock className="mr-2 h-4 w-4 animate-spin" />
+                      <Clock className="mr-2 h-4 w-4 animate-spin inline" />
                       Uploading & Starting Analysis...
                     </>
                   ) : (
                     <>
-                      <Upload className="mr-2 h-4 w-4" />
+                      <Upload className="mr-2 h-4 w-4 inline" />
                       Upload & Analyze
                     </>
                   )}
-                </Button>
+                </button>
               </CardContent>
             </Card>
 
