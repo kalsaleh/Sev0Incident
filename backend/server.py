@@ -357,7 +357,7 @@ def fallback_scoring(company_data: Dict[str, Any]) -> Dict[str, Any]:
         'is_digital_native': digital_score >= 60
     }
 
-def enhanced_fallback_scoring(company_data: Dict[str, Any]) -> Dict[str, Any]:
+def enhanced_fallback_scoring(company_data: Dict[str, Any], website_data: Dict[str, Any] = None) -> Dict[str, Any]:
     """Enhanced fallback scoring logic when AI analysis fails"""
     digital_score = 0
     incident_score = 0
