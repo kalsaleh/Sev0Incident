@@ -238,7 +238,96 @@ def fallback_scoring(company_data: Dict[str, Any]) -> Dict[str, Any]:
         'digital_native_reasoning': 'Automated scoring based on founding year, industry, and domain indicators.',
         'incident_io_fit_score': min(100, incident_score),
         'incident_io_fit_reasoning': 'Scoring based on digital native characteristics and likely technical complexity.',
-        'is_digital_native': digital_score >= 70
+        'is_digital_native': digital_score >= 60
+    }
+
+def enhanced_fallback_scoring(company_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Enhanced fallback scoring logic when AI analysis fails"""
+    digital_score = 0
+    incident_score = 0
+    reasoning = []
+    incident_reasoning = []
+    
+    name = company_data.get('name', '').lower()
+    industry = str(company_data.get('industry', '')).lower()
+    description = str(company_data.get('description', '')).lower()
+    domain = str(company_data.get('domain', '')).lower()
+    founded_year = company_data.get('founded_year')
+    
+    # Enhanced digital native scoring
+    
+    # High digital native industries (70-90 points)
+    high_digital_industries = ['saas', 'software', 'fintech', 'ecommerce', 'e-commerce', 
+                              'cloud', 'ai', 'machine learning', 'data', 'analytics', 
+                              'platform', 'api', 'developer', 'tech', 'digital']
+    if any(term in industry for term in high_digital_industries):
+        digital_score += 70
+        reasoning.append(f"High digital native industry: {industry}")
+    else:
+        # Medium digital native industries (40-60 points)
+        medium_digital_industries = ['communication', 'social', 'media', 'marketing', 
+                                    'automation', 'productivity', 'collaboration']
+        if any(term in industry for term in medium_digital_industries):
+            digital_score += 50
+            reasoning.append(f"Medium digital native industry: {industry}")
+    
+    # Check description for digital indicators
+    digital_keywords = ['platform', 'saas', 'cloud', 'api', 'software', 'digital', 
+                       'online', 'web', 'app', 'service', 'technology', 'solution']
+    digital_count = sum(1 for keyword in digital_keywords if keyword in description)
+    if digital_count >= 3:
+        digital_score += 20
+        reasoning.append("Strong digital indicators in description")
+    elif digital_count >= 1:
+        digital_score += 10
+        reasoning.append("Some digital indicators in description")
+    
+    # Domain analysis
+    if any(ext in domain for ext in ['.io', '.ai', '.tech', '.app', '.dev']):
+        digital_score += 10
+        reasoning.append("Tech-focused domain extension")
+    
+    # Company name analysis
+    tech_names = ['stripe', 'shopify', 'github', 'slack', 'zoom', 'datadog', 'mongodb']
+    if any(tech_name in name for tech_name in tech_names):
+        digital_score += 15
+        reasoning.append("Well-known digital native company")
+    
+    # Founded year (less restrictive)
+    if founded_year:
+        if founded_year >= 2010:
+            digital_score += 10
+            reasoning.append(f"Founded in digital era ({founded_year})")
+        elif founded_year >= 2000:
+            digital_score += 5
+            reasoning.append(f"Founded in early internet era ({founded_year})")
+        else:
+            reasoning.append(f"Founded before internet era ({founded_year})")
+    
+    # Incident.io fit scoring
+    
+    # High fit industries
+    high_incident_industries = ['saas', 'fintech', 'ecommerce', 'cloud', 'platform', 'api']
+    if any(term in industry for term in high_incident_industries):
+        incident_score = min(90, digital_score * 0.8)
+        incident_reasoning.append(f"High incident management needs for {industry} companies")
+    elif digital_score >= 60:
+        incident_score = min(80, digital_score * 0.7)
+        incident_reasoning.append("Digital companies typically need incident management")
+    else:
+        incident_score = digital_score * 0.3
+        incident_reasoning.append("Limited incident management needs for traditional companies")
+    
+    # Ensure scores are within bounds
+    digital_score = min(100, max(0, digital_score))
+    incident_score = min(100, max(0, incident_score))
+    
+    return {
+        'digital_native_score': digital_score,
+        'digital_native_reasoning': '; '.join(reasoning) if reasoning else 'Automated scoring based on industry and company characteristics',
+        'incident_io_fit_score': incident_score,
+        'incident_io_fit_reasoning': '; '.join(incident_reasoning) if incident_reasoning else 'Scoring based on digital native characteristics and likely technical complexity',
+        'is_digital_native': digital_score >= 60
     }
 
 async def process_batch_analysis(batch_id: str, companies: List[Dict[str, Any]]):
