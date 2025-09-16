@@ -334,6 +334,7 @@ function App() {
                 )}
 
                 <Button 
+                  type="button"
                   onClick={handleUpload} 
                   disabled={!file || uploading}
                   className="w-full bg-indigo-600 hover:bg-indigo-700"
