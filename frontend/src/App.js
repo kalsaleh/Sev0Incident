@@ -179,6 +179,7 @@ function App() {
 
   const handleExport = async (batchId) => {
     try {
+      console.log('Exporting batch:', batchId);
       const response = await axios.get(`${API}/export/${batchId}`, {
         responseType: 'blob'
       });
@@ -195,7 +196,8 @@ function App() {
       toast.success('Results exported successfully');
     } catch (error) {
       console.error('Export error:', error);
-      toast.error('Failed to export results');
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to export results';
+      toast.error(errorMessage);
     }
   };
 
