@@ -80,10 +80,16 @@ function App() {
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
-    if (selectedFile && selectedFile.type === 'text/csv') {
-      setFile(selectedFile);
-    } else {
-      toast.error('Please select a valid CSV file');
+    console.log('File selected:', selectedFile);
+    
+    if (selectedFile) {
+      if (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv')) {
+        setFile(selectedFile);
+        console.log('Valid CSV file selected:', selectedFile.name);
+      } else {
+        toast.error('Please select a valid CSV file');
+        event.target.value = '';
+      }
     }
   };
 
