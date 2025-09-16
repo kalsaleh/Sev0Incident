@@ -203,12 +203,12 @@ Format response as JSON:
                 raise ValueError("No JSON found in response")
                 
         except (json.JSONDecodeError, ValueError) as e:
-            # Fallback scoring based on basic criteria
-            return fallback_scoring(company_data)
+            # Use enhanced fallback scoring
+            return enhanced_fallback_scoring(company_data)
             
     except Exception as e:
         logger.error(f"Error analyzing company {company_data.get('name', 'Unknown')}: {str(e)}")
-        return fallback_scoring(company_data)
+        return enhanced_fallback_scoring(company_data)
 
 def fallback_scoring(company_data: Dict[str, Any]) -> Dict[str, Any]:
     """Fallback scoring logic when AI analysis fails"""
