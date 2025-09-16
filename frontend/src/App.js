@@ -28,6 +28,14 @@ function App() {
   const [progress, setProgress] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // Debug: Add function to window for testing
+  React.useEffect(() => {
+    window.debugUpload = () => {
+      console.log('Debug upload called from window');
+      handleUpload();
+    };
+  }, []);
+
   const fetchAllCompanies = async () => {
     try {
       const response = await axios.get(`${API}/companies`);
