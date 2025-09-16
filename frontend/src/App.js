@@ -25,6 +25,41 @@ function App() {
   const [progress, setProgress] = useState({});
   const [loading, setLoading] = useState(false);
 
+  const fetchAllCompanies = async () => {
+    try {
+      const response = await axios.get(`${API}/companies`);
+      const companies = response.data;
+      
+      // Group companies by batch_id to create batches
+      const batchMap = {};
+      companies.forEach(company => {
+        const batchId = company.batch_id || 'unknown';
+        if (!batchMap[batchId]) {
+          batchMap[batchId] = {
+            batch_id: batchId,
+            companies: [],
+            total_companies: 0,
+            status: 'completed',
+            uploaded_at: company.created_at
+          };
+        }
+        batchMap[batchId].companies.push(company);
+        batchMap[batchId].total_companies++;
+        
+        // Determine batch status
+        if (company.status === 'pending' || company.status === 'analyzing') {
+          batchMap[batchId].status = 'processing';
+        }
+      });
+      
+      setBatches(Object.values(batchMap).sort((a, b) => 
+        new Date(b.uploaded_at) - new Date(a.uploaded_at)
+      ));
+    } catch (error) {
+      console.error('Error fetching companies:', error);
+    }
+  };
+
   // Load existing companies on startup
   useEffect(() => {
     fetchAllCompanies();
