@@ -335,7 +335,10 @@ function App() {
 
                 <Button 
                   type="button"
-                  onClick={handleUpload} 
+                  onClick={(e) => {
+                    console.log('Button clicked!');
+                    handleUpload(e);
+                  }} 
                   disabled={!file || uploading}
                   className="w-full bg-indigo-600 hover:bg-indigo-700"
                 >
