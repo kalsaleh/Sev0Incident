@@ -199,7 +199,25 @@ function App() {
     setLoading(true);
     try {
       console.log('Fetching results for batch:', batchId);
-      const response = await axios.get(`${API}/results/${batchId}`);
+      
+      let response;
+      if (batchId.startsWith('batch-')) {
+        // This is a generated batch ID, get results by filtering companies
+        const companiesResponse = await axios.get(`${API}/companies`);
+        const companies = companiesResponse.data;
+        
+        // Filter companies by the date from the batch ID
+        const dateFilter = batchId.replace('batch-', '');
+        const filteredCompanies = companies.filter(company => 
+          company.created_at?.startsWith(dateFilter)
+        );
+        
+        response = { data: filteredCompanies };
+      } else {
+        // This is a real batch ID, use the normal results endpoint
+        response = await axios.get(`${API}/results/${batchId}`);
+      }
+      
       console.log('Results response:', response.data);
       
       setResults(response.data);
