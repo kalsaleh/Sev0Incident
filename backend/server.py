@@ -210,72 +210,86 @@ Your task is to analyze companies and provide:
 3. Clear reasoning for both scores"""
     ).with_model("openai", "gpt-4o")
 
-async def analyze_company_with_ai(company_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Analyze a single company using AI"""
+async def analyze_company_with_ai(company_data: Dict[str, Any], website_data: Dict[str, Any] = None) -> Dict[str, Any]:
+    """Analyze a single company using AI with website data"""
     try:
         chat = get_llm_chat()
         
-        # Prepare company information
+        # Prepare comprehensive company information
+        website_info = ""
+        if website_data and not website_data.get('error'):
+            website_info = f"""
+WEBSITE DATA ANALYSIS:
+- Website Title: {website_data.get('title', 'N/A')}
+- Meta Description: {website_data.get('meta_description', 'N/A')}
+- Website Content: {website_data.get('website_content', 'N/A')}
+- Structured Data: {website_data.get('json_ld_data', 'N/A')}
+"""
+        elif website_data and website_data.get('error'):
+            website_info = f"Website Analysis: Unable to fetch (Error: {website_data.get('error')})"
+        
         company_info = f"""
 Company Analysis Request:
 
-Company Name: {company_data.get('name', 'N/A')}
-Domain: {company_data.get('domain', 'N/A')}
-Industry: {company_data.get('industry', 'N/A')}
-Founded Year: {company_data.get('founded_year', 'N/A')}
-Employee Count: {company_data.get('employee_count', 'N/A')}
-Location: {company_data.get('location', 'N/A')}
-Description: {company_data.get('description', 'N/A')}
+BASIC COMPANY DATA:
+- Company Name: {company_data.get('name', 'N/A')}
+- Domain: {company_data.get('domain', 'N/A')}
+- Industry: {company_data.get('industry', 'N/A')}
+- Founded Year: {company_data.get('founded_year', 'N/A')}
+- Employee Count: {company_data.get('employee_count', 'N/A')}
+- Location: {company_data.get('location', 'N/A')}
+- Description: {company_data.get('description', 'N/A')}
 
-Please analyze this company and provide:
+{website_info}
 
-**IMPORTANT CRITERIA FOR DIGITAL NATIVE:**
-A company is digital native if it meets MOST of these criteria (not just founding year):
-- Business model fundamentally depends on digital/online platforms
-- Core product/service is software, SaaS, or digital
-- Heavy reliance on technology infrastructure
-- Born digital (even if before 2010, companies like Shopify, GitHub are digital native)
-- Cloud-native or web-first approach
-- Digital customer acquisition and engagement
+**ANALYSIS INSTRUCTIONS:**
 
-**IMPORTANT CRITERIA FOR INCIDENT.IO FIT:**
+Use ALL available data sources (CSV description, website content, meta descriptions, titles) to get a complete picture of what this company actually does.
+
+**ENHANCED DIGITAL NATIVE CRITERIA:**
+A company is digital native if it meets MOST of these criteria:
+- Core business model depends on digital/online platforms (SaaS, API, cloud services)
+- Primary product/service is software, digital platform, or technology-enabled
+- Born digital approach (web-first, cloud-native, API-first)
+- Revenue primarily from digital channels
+- Technology is core to value proposition, not just supportive
+
+**ENHANCED INCIDENT.IO FIT CRITERIA:**
 A company needs incident.io if they have:
-- Engineering teams managing complex software systems
-- High uptime requirements (SaaS, e-commerce, fintech)
-- Multiple services and microservices architecture  
-- Need for incident response and on-call management
-- DevOps/SRE practices
-- Customer-facing digital services
+- Engineering teams with complex software systems
+- High uptime requirements (SaaS, e-commerce, fintech, developer tools)
+- Microservices, cloud infrastructure, or distributed systems
+- Customer-facing digital services where downtime = revenue loss
+- DevOps/SRE practices and on-call management needs
 
-**ANALYSIS REQUIRED:**
+**SCORING GUIDELINES:**
 
-1. **Digital Native Score (0-100)**: Consider business model, not just founding year
-   - Software/SaaS companies: Usually 70-100%
-   - E-commerce platforms: Usually 60-90%  
-   - Fintech: Usually 70-90%
-   - Traditional companies with digital transformation: 20-60%
-   - Pure traditional/physical companies: 0-30%
+**Digital Native Score (0-100):**
+- **90-100%**: Pure digital/SaaS companies (Stripe, Shopify, Slack, DataDog, API companies)
+- **70-89%**: Digital-first companies with strong tech focus (fintech, dev tools, cloud services)
+- **50-69%**: Companies with significant digital transformation (modern e-commerce, digital media)
+- **30-49%**: Traditional companies with digital initiatives
+- **0-29%**: Primarily physical/traditional business models
 
-2. **Incident.io Fit Score (0-100)**: Based on technical complexity and uptime needs
-   - SaaS/Cloud companies: Usually 60-90%
-   - E-commerce platforms: Usually 50-80%
-   - Fintech: Usually 70-90%
-   - Traditional companies: Usually 10-40%
+**Incident.io Fit Score (0-100):**
+- **80-100%**: Mission-critical SaaS, developer tools, infrastructure companies
+- **60-79%**: E-commerce, fintech, high-uptime digital services
+- **40-59%**: Digital companies with moderate technical complexity
+- **20-39%**: Companies with some technical operations
+- **0-19%**: Minimal technical infrastructure needs
 
-3. **Provide specific reasoning** explaining why the company is/isn't digital native and why they would/wouldn't need incident.io
-
-**EXAMPLES:**
-- Shopify (2006, E-commerce): HIGH digital native (85%+) - born digital, SaaS platform
-- Stripe (2010, Fintech): HIGH digital native (90%+) - API-first, developer-focused
-- MongoDB (2007, Database): HIGH digital native (80%+) - cloud database platform
-- Traditional bank: LOW digital native (20%) - physical branches, traditional model
+**ANALYSIS REQUIREMENTS:**
+1. Analyze the actual business model from website content and descriptions
+2. Consider what the company ACTUALLY does based on website data
+3. Provide specific reasoning with examples from the data sources
+4. Be more nuanced - don't just use industry labels
 
 Format response as JSON:
 {{
   "digital_native_score": <number>,
-  "digital_native_reasoning": "<detailed explanation>",
+  "digital_native_reasoning": "<detailed explanation citing specific evidence from website/description>",
   "incident_io_fit_score": <number>,
-  "incident_io_fit_reasoning": "<detailed explanation>"
+  "incident_io_fit_reasoning": "<detailed explanation of technical needs and uptime requirements>"
 }}
 """
 
@@ -304,12 +318,13 @@ Format response as JSON:
                 raise ValueError("No JSON found in response")
                 
         except (json.JSONDecodeError, ValueError) as e:
-            # Use enhanced fallback scoring
-            return enhanced_fallback_scoring(company_data)
+            logger.error(f"Error parsing AI response for {company_data.get('name', 'Unknown')}: {str(e)}")
+            # Use enhanced fallback scoring with website data
+            return enhanced_fallback_scoring(company_data, website_data)
             
     except Exception as e:
         logger.error(f"Error analyzing company {company_data.get('name', 'Unknown')}: {str(e)}")
-        return enhanced_fallback_scoring(company_data)
+        return enhanced_fallback_scoring(company_data, website_data)
 
 def fallback_scoring(company_data: Dict[str, Any]) -> Dict[str, Any]:
     """Fallback scoring logic when AI analysis fails"""
