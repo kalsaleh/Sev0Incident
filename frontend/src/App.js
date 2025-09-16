@@ -596,6 +596,13 @@ function App() {
                                 <div className="text-xs text-gray-600">
                                   {company.is_digital_native ? '✓ Digital Native' : '✗ Not Digital Native'}
                                 </div>
+                                {company.digital_native_reasoning && (
+                                  <div className="text-xs text-gray-500 italic max-w-xs">
+                                    "{company.digital_native_reasoning.length > 80 
+                                      ? `${company.digital_native_reasoning.substring(0, 80)}...` 
+                                      : company.digital_native_reasoning}"
+                                  </div>
+                                )}
                               </div>
                             </TableCell>
                             <TableCell>
