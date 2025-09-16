@@ -207,7 +207,9 @@ function App() {
     }
 
     try {
+      console.log('Deleting batch:', batchId);
       await axios.delete(`${API}/batch/${batchId}`);
+      
       setBatches(prev => prev.filter(batch => batch.batch_id !== batchId));
       if (selectedBatch === batchId) {
         setSelectedBatch(null);
@@ -216,7 +218,8 @@ function App() {
       toast.success('Batch deleted successfully');
     } catch (error) {
       console.error('Delete error:', error);
-      toast.error('Failed to delete batch');
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to delete batch';
+      toast.error(errorMessage);
     }
   };
 
