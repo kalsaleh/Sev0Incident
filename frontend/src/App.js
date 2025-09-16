@@ -161,13 +161,17 @@ function App() {
   const fetchResults = async (batchId) => {
     setLoading(true);
     try {
+      console.log('Fetching results for batch:', batchId);
       const response = await axios.get(`${API}/results/${batchId}`);
+      console.log('Results response:', response.data);
+      
       setResults(response.data);
       setSelectedBatch(batchId);
       toast.success('Results loaded successfully');
     } catch (error) {
       console.error('Results fetch error:', error);
-      toast.error('Failed to load results');
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to load results';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
