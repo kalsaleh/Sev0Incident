@@ -488,38 +488,45 @@ def enhanced_fallback_scoring(company_data: Dict[str, Any], website_data: Dict[s
 async def process_batch_analysis(batch_id: str, companies: List[Dict[str, Any]]):
     """Process a batch of companies in the background"""
     try:
-        for i, company_data in enumerate(companies):
-            try:
-                # Update status to analyzing
-                await db.company_analyses.update_one(
-                    {"id": company_data["id"]},
-                    {"$set": {"status": "analyzing"}}
-                )
-                
-                # Perform AI analysis
-                analysis_result = await analyze_company_with_ai(company_data)
-                
-                # Update with analysis results
-                update_data = {
-                    **analysis_result,
-                    "status": "completed",
-                    "analyzed_at": datetime.now(timezone.utc)
-                }
-                
-                await db.company_analyses.update_one(
-                    {"id": company_data["id"]},
-                    {"$set": update_data}
-                )
-                
-                logger.info(f"Completed analysis for {company_data.get('name', 'Unknown')} ({i+1}/{len(companies)})")
-                
-            except Exception as e:
-                logger.error(f"Error processing company {company_data.get('name', 'Unknown')}: {str(e)}")
-                await db.company_analyses.update_one(
-                    {"id": company_data["id"]},
-                    {"$set": {"status": "error", "analyzed_at": datetime.now(timezone.utc)}}
-                )
-                
+        # Create aiohttp session for website fetching
+        async with aiohttp.ClientSession() as session:
+            for i, company_data in enumerate(companies):
+                try:
+                    # Update status to analyzing
+                    await db.company_analyses.update_one(
+                        {"id": company_data["id"]},
+                        {"$set": {"status": "analyzing"}}
+                    )
+                    
+                    # Fetch website data
+                    website_data = None
+                    if company_data.get('domain'):
+                        website_data = await fetch_company_website_data(company_data['domain'], session)
+                    
+                    # Perform AI analysis with website data
+                    analysis_result = await analyze_company_with_ai(company_data, website_data)
+                    
+                    # Update with analysis results
+                    update_data = {
+                        **analysis_result,
+                        "status": "completed",
+                        "analyzed_at": datetime.now(timezone.utc)
+                    }
+                    
+                    await db.company_analyses.update_one(
+                        {"id": company_data["id"]},
+                        {"$set": update_data}
+                    )
+                    
+                    logger.info(f"Completed analysis for {company_data.get('name', 'Unknown')} ({i+1}/{len(companies)})")
+                    
+                except Exception as e:
+                    logger.error(f"Error processing company {company_data.get('name', 'Unknown')}: {str(e)}")
+                    await db.company_analyses.update_one(
+                        {"id": company_data["id"]},
+                        {"$set": {"status": "error", "analyzed_at": datetime.now(timezone.utc)}}
+                    )
+                    
         logger.info(f"Batch {batch_id} processing completed")
         
     except Exception as e:
