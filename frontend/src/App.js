@@ -98,7 +98,8 @@ function App() {
     }
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (e) => {
+    e?.preventDefault();
     console.log('handleUpload called');
     console.log('File:', file);
     console.log('API URL:', API);
