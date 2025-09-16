@@ -98,11 +98,14 @@ function App() {
     formData.append('file', file);
 
     try {
+      console.log('Uploading file to:', `${API}/analyze-csv`);
       const response = await axios.post(`${API}/analyze-csv`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+
+      console.log('Upload response:', response.data);
 
       const newBatch = {
         batch_id: response.data.batch_id,
@@ -120,9 +123,14 @@ function App() {
       if (fileInput) fileInput.value = '';
       
       toast.success(response.data.message);
+      
+      // Start polling for this batch immediately
+      fetchProgress(response.data.batch_id);
+      
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error(error.response?.data?.detail || 'Failed to upload file');
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to upload file';
+      toast.error(errorMessage);
     } finally {
       setUploading(false);
     }
