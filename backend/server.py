@@ -197,7 +197,7 @@ Format response as JSON:
                     'digital_native_reasoning': result.get('digital_native_reasoning', ''),
                     'incident_io_fit_score': max(0, min(100, incident_score)),
                     'incident_io_fit_reasoning': result.get('incident_io_fit_reasoning', ''),
-                    'is_digital_native': digital_score >= 70
+                    'is_digital_native': digital_score >= 60
                 }
             else:
                 raise ValueError("No JSON found in response")
