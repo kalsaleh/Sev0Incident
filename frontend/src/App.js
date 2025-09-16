@@ -34,7 +34,7 @@ function App() {
       const batchMap = {};
       companies.forEach(company => {
         const batchId = company.batch_id;
-        if (!batchMap[batchId]) {
+        if (batchId && !batchMap[batchId]) {
           batchMap[batchId] = {
             batch_id: batchId,
             companies: [],
